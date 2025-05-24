@@ -139,8 +139,6 @@ function bindControl(btnId, keyName) {
   ['touchend', 'mouseup'].forEach(evt =>
     btn.addEventListener(evt, e => {
       e.preventDefault();
-      // trigger jump off-charge just like Space keyup
-      if (keyName === 'space' && player.charging) doJump();
       keys[keyName] = false;
     }, { passive: false })
   );
@@ -148,7 +146,39 @@ function bindControl(btnId, keyName) {
 
 bindControl('btn-left',  'left');
 bindControl('btn-right', 'right');
-bindControl('btn-jump',  'space');
+// no longer binding btn-jump
+
+// ——— Anywhere-else jump on canvas ———
+canvas.addEventListener('touchstart', e => {
+  e.preventDefault();
+  const leftBtn  = document.getElementById('btn-left').getBoundingClientRect();
+  const rightBtn = document.getElementById('btn-right').getBoundingClientRect();
+
+  // check each touch
+  for (let touch of e.touches) {
+    const x = touch.clientX, y = touch.clientY;
+    const inLeft  = x >= leftBtn.left  && x <= leftBtn.right  && y >= leftBtn.top  && y <= leftBtn.bottom;
+    const inRight = x >= rightBtn.left && x <= rightBtn.right && y >= rightBtn.top && y <= rightBtn.bottom;
+    if (!inLeft && !inRight) {
+      // start jump charge
+      if (player.onGround && !player.charging) {
+        keys.space = true;
+        player.charging = true;
+        player.chargeTime = 0;
+      }
+      break;
+    }
+  }
+}, { passive: false });
+
+canvas.addEventListener('touchend', e => {
+  e.preventDefault();
+  // finish jump on any touch end
+  if (player.charging) {
+    doJump();
+    keys.space = false;
+  }
+}, { passive: false });
 
 // ——— Platform Generator ———
 const platforms = [
