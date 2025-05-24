@@ -5,6 +5,38 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Jump King–Style Game</title>
   <link rel="stylesheet" href="style.css" />
+  <style>
+    /* Mobile control styles */
+    #mobile-controls {
+      position: fixed;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 20px;
+      z-index: 1000;
+    }
+    #mobile-controls button {
+      width: 60px;
+      height: 60px;
+      font-size: 24px;
+      opacity: 0.6;
+      border: none;
+      border-radius: 30px;
+      background: #333;
+      color: #fff;
+      touch-action: none;
+    }
+    #mobile-controls button:active {
+      opacity: 1;
+    }
+    /* Hide on larger screens */
+    @media (min-width: 768px) {
+      #mobile-controls {
+        display: none;
+      }
+    }
+  </style>
 </head>
 <body>
   <div id="homeScreen">
@@ -13,7 +45,43 @@
   </div>
 
   <canvas id="gameCanvas"></canvas>
+
+  <!-- Mobile touch controls -->
+  <div id="mobile-controls">
+    <button id="btn-left">◀️</button>
+    <button id="btn-jump">⎵</button>
+    <button id="btn-right">▶️</button>
+  </div>
+
   <script src="game.js"></script>
+  <script>
+    // Bind touch/mouse events to your existing `keys` object
+    const keys = window.keys || { left: false, right: false, jump: false };
+
+    function bindControl(btnId, keyName) {
+      const btn = document.getElementById(btnId);
+      if (!btn) return;
+
+      // touchstart / mousedown → key down
+      ['touchstart', 'mousedown'].forEach(evt =>
+        btn.addEventListener(evt, e => {
+          e.preventDefault();
+          keys[keyName] = true;
+        }, { passive: false })
+      );
+
+      // touchend / mouseup → key up
+      ['touchend', 'mouseup'].forEach(evt =>
+        btn.addEventListener(evt, e => {
+          e.preventDefault();
+          keys[keyName] = false;
+        }, { passive: false })
+      );
+    }
+
+    bindControl('btn-left',  'left');
+    bindControl('btn-right', 'right');
+    bindControl('btn-jump',  'jump');
+  </script>
 </body>
 </html>
-
