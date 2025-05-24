@@ -122,6 +122,34 @@ window.addEventListener('keyup', e => {
   }
 });
 
+// ——— Mobile touch controls binding ———
+function bindControl(btnId, keyName) {
+  const btn = document.getElementById(btnId);
+  if (!btn) return;
+
+  // Press start
+  ['touchstart', 'mousedown'].forEach(evt =>
+    btn.addEventListener(evt, e => {
+      e.preventDefault();
+      keys[keyName] = true;
+    }, { passive: false })
+  );
+
+  // Press end
+  ['touchend', 'mouseup'].forEach(evt =>
+    btn.addEventListener(evt, e => {
+      e.preventDefault();
+      // trigger jump off-charge just like Space keyup
+      if (keyName === 'space' && player.charging) doJump();
+      keys[keyName] = false;
+    }, { passive: false })
+  );
+}
+
+bindControl('btn-left',  'left');
+bindControl('btn-right', 'right');
+bindControl('btn-jump',  'space');
+
 // ——— Platform Generator ———
 const platforms = [
   { x: 0,   y: canvas.height - 20, width: canvas.width, height: 530 }, // Ground
